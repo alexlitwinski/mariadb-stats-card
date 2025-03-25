@@ -1,0 +1,42 @@
+{
+  "config": {
+    "title": "MariaDB Stats",
+    "step": {
+      "user": {
+        "title": "Configure MariaDB Connection",
+        "description": "Set up connection to your MariaDB database.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "database": "Database name"
+        }
+      }
+    },
+    "error": {
+      "auth_error": "Invalid credentials. Check your username and password.",
+      "conn_error": "Connection error. Check host and port.",
+      "db_error": "Database error. Verify the database exists.",
+      "unknown": "Unknown error occurred."
+    },
+    "abort": {
+      "already_configured": "This connection is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MariaDB Stats Options",
+        "description": "Configure MariaDB connection",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "database": "Database name"
+        }
+      }
+    }
+  }
+}
