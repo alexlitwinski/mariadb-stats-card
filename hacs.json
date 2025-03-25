@@ -1,6 +1,9 @@
 {
-  "name": "MariaDB Stats Card",
+  "name": "MariaDB Stats",
   "render_readme": true,
+  "domain": "mariadb_stats",
+  "documentation": "https://github.com/seu_usuario/ha-mariadb-stats",
   "country": "BR",
-  "homeassistant": "2023.1.0"
+  "homeassistant": "2023.1.0",
+  "content_in_root": false
 }
