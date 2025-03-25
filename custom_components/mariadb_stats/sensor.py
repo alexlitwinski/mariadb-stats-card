@@ -3,11 +3,14 @@ Home Assistant Component para mostrar estatísticas do banco de dados MariaDB.
 Arquivo: sensor.py
 """
 import logging
-from typing import Optional
+from typing import Optional, Any, Dict
 import voluptuous as vol
 import pymysql
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.sensor import (
+    SensorEntity,
+    PLATFORM_SCHEMA
+)
 from homeassistant.const import (
     CONF_HOST,
     CONF_PORT,
@@ -16,9 +19,15 @@ from homeassistant.const import (
     CONF_DATABASE
 )
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.typing import (
+    ConfigType,
+    DiscoveryInfoType,
+    HomeAssistantType
+)
 from homeassistant.util import Throttle
 from datetime import timedelta
+
+from . import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,13 +46,38 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_DATABASE, default=DEFAULT_DATABASE): cv.string,
 })
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Set up the MariaDB Stats sensor."""
+async def async_setup_platform(
+    hass: HomeAssistantType,
+    config: ConfigType,
+    async_add_entities,
+    discovery_info: Optional[DiscoveryInfoType] = None
+):
+    """Set up the MariaDB Stats sensor from YAML config."""
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT)
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
     database = config.get(CONF_DATABASE)
+
+    db_stats = MariaDBStats(host, port, username, password, database)
+    
+    # Verifica a conexão
+    await hass.async_add_executor_job(db_stats.update)
+    
+    if db_stats.connected:
+        async_add_entities([MariaDBStatsSensor(db_stats)], True)
+    else:
+        _LOGGER.error("Falha ao conectar ao banco de dados MariaDB")
+
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the MariaDB Stats sensor from a config entry."""
+    config = hass.data[DOMAIN][config_entry.entry_id]
+    
+    host = config.get(CONF_HOST, DEFAULT_HOST)
+    port = config.get(CONF_PORT, DEFAULT_PORT)
+    username = config.get(CONF_USERNAME)
+    password = config.get(CONF_PASSWORD)
+    database = config.get(CONF_DATABASE, DEFAULT_DATABASE)
 
     db_stats = MariaDBStats(host, port, username, password, database)
     
@@ -124,7 +158,7 @@ class MariaDBStats:
             _LOGGER.error("Erro ao conectar ao MariaDB: %s", str(e))
 
 
-class MariaDBStatsSensor(Entity):
+class MariaDBStatsSensor(SensorEntity):
     """Sensor para mostrar estatísticas do MariaDB."""
 
     def __init__(self, db_stats):
@@ -133,6 +167,7 @@ class MariaDBStatsSensor(Entity):
         self._name = DEFAULT_NAME
         self._state = None
         self._attributes = {}
+        self._attr_unique_id = f"mariadb_stats_{db_stats.host}_{db_stats.database}"
 
     @property
     def name(self):
@@ -157,7 +192,7 @@ class MariaDBStatsSensor(Entity):
         return "mdi:database"
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> Dict[str, Any]:
         """Retorna atributos adicionais do sensor."""
         attributes = {}
         
@@ -180,4 +215,4 @@ class MariaDBStatsSensor(Entity):
 
     async def async_update(self):
         """Atualiza o estado do sensor."""
-        await self._hass.async_add_executor_job(self._db_stats.update)
+        await self.hass.async_add_executor_job(self._db_stats.update)
