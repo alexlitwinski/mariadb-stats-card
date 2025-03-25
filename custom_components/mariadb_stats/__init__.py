@@ -10,13 +10,12 @@ from homeassistant.const import (
     CONF_PORT,
     CONF_USERNAME,
     CONF_PASSWORD,
-    CONF_DATABASE
 )
 import homeassistant.helpers.config_validation as cv
 
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN, CONF_DATABASE
 
-DOMAIN = "mariadb_stats"
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
