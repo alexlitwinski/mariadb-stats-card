@@ -1,143 +1,51 @@
 class MariaDBStatsCard extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
-
   set hass(hass) {
     if (!this.content) {
-      // Criar elementos base uma única vez
-      const card = document.createElement('ha-card');
-      
-      const style = document.createElement('style');
-      style.textContent = `
-        ha-card {
-          padding: 16px;
-        }
-        .header {
-          font-size: 1.2em;
-          font-weight: 500;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-        }
-        .header ha-icon {
-          margin-right: 8px;
-        }
-        .db-info {
-          margin-bottom: 16px;
-        }
-        .info-item {
-          margin-bottom: 8px;
-          display: flex;
-          justify-content: space-between;
-        }
-        .info-label {
-          font-weight: 500;
-        }
-        .table-container {
-          border: 1px solid var(--divider-color);
-          border-radius: 4px;
-          margin-top: 16px;
-        }
-        .table-row {
-          display: flex;
-          padding: 8px;
-          border-bottom: 1px solid var(--divider-color);
-        }
-        .table-row:last-child {
-          border-bottom: none;
-        }
-        .table-header {
-          font-weight: bold;
-          background-color: var(--secondary-background-color);
-        }
-        .table-name {
-          flex: 3;
-        }
-        .table-rows, .table-size {
-          flex: 1;
-          text-align: right;
-        }
+      this.innerHTML = `
+        <ha-card>
+          <div class="card-content">
+            <div id="mariadb-content"></div>
+          </div>
+        </ha-card>
       `;
-
-      this.content = document.createElement('div');
-      card.appendChild(this.content);
-      
-      this.shadowRoot.appendChild(style);
-      this.shadowRoot.appendChild(card);
+      this.content = this.querySelector('#mariadb-content');
     }
 
-    // Obter configuração e entidade
     const entityId = this.config.entity;
-    const stateObj = hass.states[entityId];
-    
-    if (!stateObj) {
-      this.content.innerHTML = `
-        <div>Entidade não encontrada: ${entityId}</div>
-      `;
+    if (!entityId || !hass.states[entityId]) {
+      this.content.innerHTML = `Entidade não encontrada: ${entityId || 'não especificada'}`;
       return;
     }
 
-    // Obter dados
+    const state = hass.states[entityId];
     const title = this.config.title || 'Estatísticas do MariaDB';
-    const icon = this.config.icon || 'mdi:database';
-    const dbSize = stateObj.state;
-    const tables = stateObj.attributes.tables || [];
-    const dbName = stateObj.attributes.database_name || 'homeassistant';
-    const totalTables = stateObj.attributes.total_tables || 0;
-    const error = stateObj.attributes.error;
+    const dbSize = state.state;
+    const dbName = state.attributes.database_name || '';
+    const totalTables = state.attributes.total_tables || 0;
+    const tables = state.attributes.tables || [];
 
-    // Construir HTML
-    let html = `
-      <div class="header">
-        <ha-icon icon="${icon}"></ha-icon>
-        ${title}
-      </div>
-    `;
+    let html = `<h3>${title}</h3>
+                <p>Banco de dados: ${dbName}</p>
+                <p>Tamanho total: ${dbSize} MB</p>
+                <p>Total de tabelas: ${totalTables}</p>`;
 
-    if (error) {
-      html += `<div style="color: var(--error-color)">Erro: ${error}</div>`;
-    } else {
-      html += `
-        <div class="db-info">
-          <div class="info-item">
-            <span class="info-label">Banco de dados:</span>
-            <span>${dbName}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Tamanho total:</span>
-            <span>${dbSize} MB</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Total de tabelas:</span>
-            <span>${totalTables}</span>
-          </div>
-        </div>
-      `;
-
-      if (tables && tables.length > 0) {
-        html += `
-          <div class="table-container">
-            <div class="table-row table-header">
-              <div class="table-name">Tabela</div>
-              <div class="table-rows">Registros</div>
-              <div class="table-size">Tamanho (MB)</div>
-            </div>
-        `;
-
-        tables.forEach(table => {
-          html += `
-            <div class="table-row">
-              <div class="table-name">${table.name}</div>
-              <div class="table-rows">${table.rows}</div>
-              <div class="table-size">${table.size_mb}</div>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-      }
+    if (tables.length > 0) {
+      html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+      html += '<tr style="font-weight: bold; background-color: #f0f0f0;">';
+      html += '<td style="padding: 8px; border: 1px solid #ddd;">Tabela</td>';
+      html += '<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">Registros</td>';
+      html += '<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">Tamanho (MB)</td>';
+      html += '</tr>';
+      
+      tables.forEach(table => {
+        html += `<tr>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${table.name}</td>
+                  <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${table.rows}</td>
+                  <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${table.size_mb}</td>
+                </tr>`;
+      });
+      
+      html += '</table>';
     }
 
     this.content.innerHTML = html;
@@ -151,14 +59,7 @@ class MariaDBStatsCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 3;
-  }
-
-  static getStubConfig() {
-    return {
-      entity: 'sensor.mariadb_stats',
-      title: 'Estatísticas do MariaDB'
-    };
+    return 4;
   }
 }
 
@@ -168,5 +69,5 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'mariadb-stats-card',
   name: 'MariaDB Stats Card',
-  description: 'Card para exibir estatísticas do banco de dados MariaDB do Home Assistant'
+  description: 'Card para estatísticas do MariaDB'
 });
