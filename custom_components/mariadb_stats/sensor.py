@@ -193,6 +193,24 @@ class MariaDBStatsSensor(SensorEntity):
         attributes = {}
         
         if self._db_stats.connected:
+            # Informações básicas
+            attributes["database_name"] = self._db_stats.database
+            attributes["total_tables"] = len(self._db_stats.tables)
+            
+            # Criar um sumário formatado para exibição
+            summary = "📊 RESUMO DAS TABELAS:\n\n"
+            summary += "| TABELA | REGISTROS | TAMANHO (MB) |\n"
+            summary += "|--------|-----------|-------------|\n"
+            
+            for table in self._db_stats.tables:
+                table_name = table["name"]
+                rows = f"{table['rows']:,}".replace(",", ".")
+                size_mb = f"{round(table['size'] / (1024 * 1024), 2):.2f}"
+                summary += f"| {table_name} | {rows} | {size_mb} |\n"
+            
+            attributes["tables_summary"] = summary
+            
+            # Manter o atributo original para compatibilidade
             tables_info = []
             for table in self._db_stats.tables:
                 tables_info.append({
@@ -200,10 +218,7 @@ class MariaDBStatsSensor(SensorEntity):
                     "rows": table["rows"],
                     "size_mb": round(table["size"] / (1024 * 1024), 2) if table["size"] else 0
                 })
-                
             attributes["tables"] = tables_info
-            attributes["database_name"] = self._db_stats.database
-            attributes["total_tables"] = len(self._db_stats.tables)
         else:
             attributes["error"] = self._db_stats.error_message
             
