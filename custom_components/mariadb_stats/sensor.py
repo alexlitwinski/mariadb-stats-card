@@ -16,7 +16,6 @@ from homeassistant.const import (
     CONF_PORT,
     CONF_USERNAME,
     CONF_PASSWORD,
-    CONF_DATABASE
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import (
@@ -27,14 +26,11 @@ from homeassistant.helpers.typing import (
 from homeassistant.util import Throttle
 from datetime import timedelta
 
-from . import DOMAIN
+from .const import DOMAIN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_DATABASE, CONF_DATABASE
 
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = "MariaDB Stats"
-DEFAULT_HOST = "localhost"
-DEFAULT_PORT = 3306
-DEFAULT_DATABASE = "homeassistant"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=30)
 
