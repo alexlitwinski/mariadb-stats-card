@@ -38,13 +38,15 @@ async def validate_input(hass: HomeAssistant, data):
     
     try:
         # Testa a conexão com o banco de dados
+        # Corrigido: não usar argumentos nomeados para async_add_executor_job
         connection = await hass.async_add_executor_job(
-            pymysql.connect,
-            host,
-            username,
-            password,
-            database,
-            port=port
+            lambda: pymysql.connect(
+                host=host,
+                user=username,
+                password=password,
+                database=database,
+                port=port
+            )
         )
         
         # Testa uma consulta básica
