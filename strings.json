@@ -1,0 +1,42 @@
+{
+  "config": {
+    "title": "MariaDB Stats",
+    "step": {
+      "user": {
+        "title": "Configurar conexão com MariaDB",
+        "description": "Configure a conexão com o seu banco de dados MariaDB.",
+        "data": {
+          "host": "Host",
+          "port": "Porta",
+          "username": "Usuário",
+          "password": "Senha",
+          "database": "Nome do banco de dados"
+        }
+      }
+    },
+    "error": {
+      "auth_error": "Credenciais inválidas. Verifique seu usuário e senha.",
+      "conn_error": "Erro de conexão. Verifique host e porta.",
+      "db_error": "Erro no banco de dados. Verifique se o banco de dados existe.",
+      "unknown": "Erro desconhecido."
+    },
+    "abort": {
+      "already_configured": "Esta conexão já está configurada."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opções de MariaDB Stats",
+        "description": "Configurar conexão com MariaDB",
+        "data": {
+          "host": "Host",
+          "port": "Porta",
+          "username": "Usuário",
+          "password": "Senha",
+          "database": "Nome do banco de dados"
+        }
+      }
+    }
+  }
+}
