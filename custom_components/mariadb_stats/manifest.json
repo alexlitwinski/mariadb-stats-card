@@ -1,6 +1,7 @@
 {
   "domain": "mariadb_stats",
   "name": "MariaDB Stats",
+  "config_flow": true,
   "documentation": "https://github.com/seu_usuario/ha-mariadb-stats",
   "issue_tracker": "https://github.com/seu_usuario/ha-mariadb-stats/issues",
   "dependencies": [],
