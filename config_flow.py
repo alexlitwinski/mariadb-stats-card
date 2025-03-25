@@ -10,12 +10,10 @@ from homeassistant.const import (
     CONF_PORT,
     CONF_USERNAME,
     CONF_PASSWORD,
-    CONF_DATABASE,
 )
 import homeassistant.helpers.config_validation as cv
 
-from .sensor import DEFAULT_HOST, DEFAULT_PORT, DEFAULT_DATABASE
-from . import DOMAIN
+from .const import DOMAIN, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_DATABASE, CONF_DATABASE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,10 +41,10 @@ async def validate_input(hass: HomeAssistant, data):
         connection = await hass.async_add_executor_job(
             pymysql.connect,
             host,
-            port,
             username,
             password,
-            database
+            database,
+            port=port
         )
         
         # Testa uma consulta básica
