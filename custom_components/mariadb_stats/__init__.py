@@ -74,10 +74,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Armazena a entrada de configuração para uso pelos sensores
     hass.data[DOMAIN][entry.entry_id] = entry.data
     
-    # Configura a plataforma do sensor com base na entrada de configuração
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    )
+    # CORREÇÃO: Usar async_forward_entry_setups em vez de async_forward_entry_setup
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     
     entry.async_on_unload(entry.add_update_listener(update_listener))
     
@@ -89,7 +87,7 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, "sensor")
+    unload_ok = await hass.config_entries.async_unload_entry(entry, "sensor")
     
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
