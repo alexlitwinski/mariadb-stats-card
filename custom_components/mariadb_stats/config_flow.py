@@ -124,7 +124,9 @@ class MariaDBStatsOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         """Initialize options flow."""
-        self.config_entry = config_entry
+        # CORREÇÃO: Remover self.config_entry = config_entry (deprecated)
+        # A configuração está disponível via self.config_entry automaticamente
+        pass
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
